@@ -1,0 +1,237 @@
+---
+// src/pages/beyblade-tracker.astro
+---
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beyblade Tournament Tracker</title>
+</head>
+<body>
+    <main class="container">
+        <header>
+            <h1>Beyblade Tournament Tracker</h1>
+        </header>
+
+        <div class="grid">
+            <!-- Tournament Setup Section -->
+            <section class="card setup-section">
+                <h2>Tournament Setup</h2>
+                <div class="form-group">
+                    <label for="tournamentName">Tournament Name</label>
+                    <input type="text" id="tournamentName" placeholder="e.g. Summer Cup 2026">
+                </div>
+                <div class="form-group">
+                    <label for="swissRounds">Rounds (Swiss)</label>
+                    <input type="number" id="swissRounds" min="1" value="3">
+                </div>
+                <div class="form-group">
+                    <label for="deckFormat">Deck Format</label>
+                    <select id="deckFormat">
+                        <option value="3g">3G Deck</option>
+                        <option value="1v1">1v1</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <div class="form-group checkbox-group">
+                    <label>
+                        <input type="checkbox" id="enableTopCut"> Enable Top Cut (Single Elim)
+                    </label>
+                    <input type="number" id="topCutSize" placeholder="Size (e.g. 8)" min="2" disabled>
+                </div>
+            </section>
+
+            <!-- Match Entry Section -->
+            <section class="card entry-section">
+                <h2>Record Match</h2>
+                <div class="player-inputs">
+                    <div class="form-group">
+                        <label for="player1">Player 1</label>
+                        <input type="text" id="player1" placeholder="Blader Name">
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="form-group">
+                        <label for="player2">Player 2</label>
+                        <input type="text" id="player2" placeholder="Blader Name">
+                    </div>
+                </div>
+                <hr>
+                <div class="finish-inputs">
+                    <div class="form-group">
+                        <label for="finishType">Finish Type</label>
+                        <select id="finishType">
+                            <option value="spin">Spin Finish</option>
+                            <option value="burst">Burst Finish</option>
+                            <option value="pocket">Pocket Finish (Over)</option>
+                            <option value="extreme">Extreme Finish</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="points">Points</label>
+                        <input type="number" id="points" min="0" value="1">
+                    </div>
+                </div>
+                <button type="button" class="btn-primary">Record Match</button>
+            </section>
+        </div>
+
+        <!-- Standings / Log Section -->
+        <section class="card log-section">
+            <h2>Match History & Standings</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Round</th>
+                            <th>Player 1</th>
+                            <th>Player 2</th>
+                            <th>Result</th>
+                            <th>Finish Type</th>
+                            <th>Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Tyson</td>
+                            <td>Kai</td>
+                            <td>Tyson Win</td>
+                            <td>Burst Finish</td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Ray</td>
+                            <td>Max</td>
+                            <td>Ray Win</td>
+                            <td>Spin Finish</td>
+                            <td>1</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 { margin: 0; font-size: 2.5rem; color: var(--primary); }
+        h2 { margin-top: 0; font-size: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        label { font-weight: 600; font-size: 0.875rem; }
+        input, select {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            font-size: 1rem;
+        }
+
+        .checkbox-group {
+            flex-direction: row;
+            align-items: center;
+            gap: 1rem;
+        }
+        .checkbox-group input[type="number"] {
+            width: 80px;
+        }
+
+        .player-inputs {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .player-inputs .form-group { flex: 1; }
+        .vs { font-weight: bold; padding-top: 1rem; color: #94a3b8; }
+
+        .finish-inputs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .finish-inputs .form-group { flex: 1; }
+
+        .btn-primary {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        th { background: #f1f5f9; font-size: 0.875rem; }
+
+        hr { border: 0; border-top: 1px solid var(--border); margin: 1rem 0; }
+    </style>
+</body>
+</html>
