@@ -1,0 +1,23 @@
+---
+import BattleshipGame from '../components/battleship/BattleshipGame';
+import '../styles/global.css';
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Battleship PVP | Portfolio</title>
+	</head>
+	<body class="bg-slate-950 text-slate-100">
+		<main>
+			<BattleshipGame client:only="react" />
+		</main>
+	</body>
+</html>
+
+<style is:global>
+	@import "tailwindcss";
+</style>

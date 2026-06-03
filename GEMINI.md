@@ -7,11 +7,14 @@ This is a portfolio website built using [Astro](https://astro.build/).
 
 ### Features
 - **Beyblade Tournament Tracker:** A specialized tool for tracking Beyblade tournaments (Swiss rounds, Top Cut, 3G Deck format). Located at `/beyblade-tracker`.
+- **Battleship PvP:** A real-time peer-to-peer naval combat game using WebRTC. Located at `/battleship`.
 
 ## Tech Stack
 - **Framework:** Astro
-- **Styling:** (TBD - Defaulting to Vanilla CSS)
+- **UI Libraries:** React (for interactive islands)
+- **Styling:** Tailwind CSS (preferred), Vanilla CSS
 - **Language:** TypeScript
+- **Networking:** PeerJS (WebRTC)
 
 ## Conventions
 - Follow standard Astro and TypeScript best practices.

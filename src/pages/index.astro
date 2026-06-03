@@ -1,5 +1,5 @@
 ---
-
+import '../styles/global.css';
 ---
 
 <html lang="en">
@@ -9,9 +9,56 @@
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<title>My Portfolio | Projects</title>
 	</head>
-	<body>
-		<h1>Astro</h1>
+	<body class="bg-slate-950 text-slate-100 font-sans selection:bg-blue-500/30">
+		<main class="max-w-4xl mx-auto px-6 py-24">
+			<header class="mb-20">
+				<h1 class="text-6xl font-black tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-600">
+					PROJECTS_
+				</h1>
+				<p class="text-slate-400 text-lg max-w-xl">
+					A collection of interactive tools and experiments built with modern web technologies.
+				</p>
+			</header>
+
+			<div class="grid md:grid-cols-2 gap-8">
+				<a href="/battleship" class="group relative p-8 bg-slate-900 rounded-3xl border border-slate-800 hover:border-blue-500/50 transition-all hover:shadow-2xl hover:shadow-blue-500/10">
+					<div class="absolute top-4 right-4 text-blue-500 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-circle"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="m12 8 4 4-4 4"/></svg>
+					</div>
+					<div class="mb-4 w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-target"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+					</div>
+					<h2 class="text-2xl font-bold mb-2">Battleship PVP</h2>
+					<p class="text-slate-400 text-sm leading-relaxed">
+						Real-time peer-to-peer naval combat using WebRTC. No backend required—just share an ID and battle.
+					</p>
+					<div class="mt-6 flex gap-2">
+						<span class="px-3 py-1 bg-slate-800 text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded-full">React</span>
+						<span class="px-3 py-1 bg-slate-800 text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded-full">WebRTC</span>
+						<span class="px-3 py-1 bg-slate-800 text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded-full">Tailwind</span>
+					</div>
+				</a>
+
+				<a href="/beyblade-tracker" class="group relative p-8 bg-slate-900 rounded-3xl border border-slate-800 hover:border-blue-500/50 transition-all hover:shadow-2xl hover:shadow-blue-500/10">
+					<div class="absolute top-4 right-4 text-blue-500 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-circle"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="m12 8 4 4-4 4"/></svg>
+					</div>
+					<div class="mb-4 w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-500">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-swords"><polyline points="2 17 6 21 13 14"/><path d="m18 13 4 4-5 5-4-4"/><path d="m2 2 20 20"/><path d="m14.5 9 4.5-4.5"/><path d="m15.8 8.2 1.4-1.4"/><path d="m11 13 5 5"/><path d="m16.8 17.2 1.4-1.4"/></svg>
+					</div>
+					<h2 class="text-2xl font-bold mb-2">Beyblade Tracker</h2>
+					<p class="text-slate-400 text-sm leading-relaxed">
+						Tournament management system for Beyblade competitions. Supports Swiss rounds and 3G Deck formats.
+					</p>
+					<div class="mt-6 flex gap-2">
+						<span class="px-3 py-1 bg-slate-800 text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded-full">Astro</span>
+						<span class="px-3 py-1 bg-slate-800 text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded-full">Vanilla JS</span>
+					</div>
+				</a>
+			</div>
+		</main>
 	</body>
 </html>
+
