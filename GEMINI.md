@@ -5,6 +5,9 @@ This file contains team-shared architecture, conventions, and workflows for this
 ## Project Overview
 This is a portfolio website built using [Astro](https://astro.build/).
 
+### Features
+- **Beyblade Tournament Tracker:** A specialized tool for tracking Beyblade tournaments (Swiss rounds, Top Cut, 3G Deck format). Located at `/beyblade-tracker`.
+
 ## Tech Stack
 - **Framework:** Astro
 - **Styling:** (TBD - Defaulting to Vanilla CSS)
