@@ -9,56 +9,117 @@ import '../styles/global.css';
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>My Portfolio | Projects</title>
+		<title>Portfolio - The Free Encyclopedia of Projects</title>
 	</head>
-	<body class="bg-slate-950 text-slate-100 font-sans selection:bg-blue-500/30">
-		<main class="max-w-4xl mx-auto px-6 py-24">
-			<header class="mb-20">
-				<h1 class="text-6xl font-black tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-600">
-					PROJECTS_
-				</h1>
-				<p class="text-slate-400 text-lg max-w-xl">
-					A collection of interactive tools and experiments built with modern web technologies.
-				</p>
-			</header>
+	<body class="bg-white text-[#202122] font-sans selection:bg-[#a7d7f9]">
+		<div class="min-h-screen flex flex-col items-center justify-center p-4">
+			
+			<!-- Central Logo and Links Container -->
+			<div class="relative w-full max-w-4xl flex flex-col items-center">
+				
+				<!-- Logo -->
+				<div class="mb-8 relative group">
+					<div class="w-40 h-40 md:w-48 md:h-48 bg-[#f8f9fa] border border-gray-200 rounded-full flex flex-col items-center justify-center shadow-sm relative z-10">
+						<span class="text-6xl md:text-7xl font-serif">W</span>
+						<span class="text-[10px] md:text-xs uppercase tracking-[0.2em] font-bold mt-1">Portfolio</span>
+					</div>
+					
+					<!-- Circular Links (Desktop) -->
+					<div class="hidden md:block absolute inset-0 -m-32 pointer-events-none">
+						<!-- Battleship -->
+						<div class="absolute top-1/2 left-0 -translate-y-1/2 pointer-events-auto text-right pr-48 w-1/2">
+							<a href="/battleship" class="group">
+								<strong class="block text-xl text-[#0645ad] group-hover:underline">Battleship PVP</strong>
+								<span class="text-sm text-gray-500 italic">WebRTC Naval Combat</span>
+							</a>
+						</div>
+						
+						<!-- Beyblade -->
+						<div class="absolute top-1/2 right-0 -translate-y-1/2 pointer-events-auto text-left pl-48 w-1/2">
+							<a href="/beyblade-tracker" class="group">
+								<strong class="block text-xl text-[#0645ad] group-hover:underline">Beyblade Tracker</strong>
+								<span class="text-sm text-gray-500 italic">Tournament Management</span>
+							</a>
+						</div>
 
-			<div class="grid md:grid-cols-2 gap-8">
-				<a href="/battleship" class="group relative p-8 bg-slate-900 rounded-3xl border border-slate-800 hover:border-blue-500/50 transition-all hover:shadow-2xl hover:shadow-blue-500/10">
-					<div class="absolute top-4 right-4 text-blue-500 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
-						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-circle"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="m12 8 4 4-4 4"/></svg>
+						<!-- Future Projects Placeholders -->
+						<div class="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-auto text-center pb-48 h-1/2 flex flex-col justify-end">
+							<div class="opacity-30 cursor-not-allowed">
+								<strong class="block text-lg text-gray-400">Next Project</strong>
+								<span class="text-xs text-gray-400 italic">Coming Soon</span>
+							</div>
+						</div>
+						
+						<div class="absolute bottom-0 left-1/2 -translate-x-1/2 pointer-events-auto text-center pt-48 h-1/2">
+							<div class="opacity-30 cursor-not-allowed">
+								<strong class="block text-lg text-gray-400">Experimental</strong>
+								<span class="text-xs text-gray-400 italic">Under Construction</span>
+							</div>
+						</div>
 					</div>
-					<div class="mb-4 w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500">
-						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-target"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-					</div>
-					<h2 class="text-2xl font-bold mb-2">Battleship PVP</h2>
-					<p class="text-slate-400 text-sm leading-relaxed">
-						Real-time peer-to-peer naval combat using WebRTC. No backend required—just share an ID and battle.
-					</p>
-					<div class="mt-6 flex gap-2">
-						<span class="px-3 py-1 bg-slate-800 text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded-full">React</span>
-						<span class="px-3 py-1 bg-slate-800 text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded-full">WebRTC</span>
-						<span class="px-3 py-1 bg-slate-800 text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded-full">Tailwind</span>
-					</div>
-				</a>
+				</div>
 
-				<a href="/beyblade-tracker" class="group relative p-8 bg-slate-900 rounded-3xl border border-slate-800 hover:border-blue-500/50 transition-all hover:shadow-2xl hover:shadow-blue-500/10">
-					<div class="absolute top-4 right-4 text-blue-500 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
-						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-circle"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="m12 8 4 4-4 4"/></svg>
+				<!-- Mobile Links (Simple list) -->
+				<div class="md:hidden grid grid-cols-2 gap-8 mb-12 text-center">
+					<a href="/battleship" class="group">
+						<strong class="block text-[#0645ad] group-hover:underline">Battleship</strong>
+						<span class="text-xs text-gray-500">WebRTC</span>
+					</a>
+					<a href="/beyblade-tracker" class="group">
+						<strong class="block text-[#0645ad] group-hover:underline">Beyblade</strong>
+						<span class="text-xs text-gray-500">Tracker</span>
+					</a>
+				</div>
+
+				<!-- Search Bar Area -->
+				<div class="w-full max-w-xl flex flex-col items-center">
+					<div class="w-full flex border-2 border-[#a2a9b1] focus-within:border-[#3366cc] transition-colors rounded-sm overflow-hidden mb-4">
+						<input 
+							type="text" 
+							placeholder="Search Projects..." 
+							class="flex-1 px-4 py-2 outline-none text-lg"
+						/>
+						<button class="bg-[#3366cc] text-white px-6 py-2 font-bold hover:bg-[#2a4b8d] transition-colors">
+							Search
+						</button>
 					</div>
-					<div class="mb-4 w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-500">
-						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-swords"><polyline points="2 17 6 21 13 14"/><path d="m18 13 4 4-5 5-4-4"/><path d="m2 2 20 20"/><path d="m14.5 9 4.5-4.5"/><path d="m15.8 8.2 1.4-1.4"/><path d="m11 13 5 5"/><path d="m16.8 17.2 1.4-1.4"/></svg>
+					
+					<div class="flex gap-4 text-sm text-[#0645ad]">
+						<a href="#" class="hover:underline flex items-center gap-1">
+							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6 6-6"/></svg>
+							Read in your language
+						</a>
 					</div>
-					<h2 class="text-2xl font-bold mb-2">Beyblade Tracker</h2>
-					<p class="text-slate-400 text-sm leading-relaxed">
-						Tournament management system for Beyblade competitions. Supports Swiss rounds and 3G Deck formats.
-					</p>
-					<div class="mt-6 flex gap-2">
-						<span class="px-3 py-1 bg-slate-800 text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded-full">Astro</span>
-						<span class="px-3 py-1 bg-slate-800 text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded-full">Vanilla JS</span>
-					</div>
-				</a>
+				</div>
+
 			</div>
-		</main>
+
+			<!-- Footer Links -->
+			<footer class="mt-24 w-full max-w-5xl border-t border-gray-200 pt-8 flex flex-col items-center text-sm text-gray-600">
+				<div class="flex flex-wrap justify-center gap-x-8 gap-y-4 mb-8 text-[#0645ad]">
+					<a href="#" class="hover:underline flex items-center gap-2">
+						<div class="w-4 h-4 bg-gray-200 rounded-sm"></div>
+						Wiktionary
+					</a>
+					<a href="#" class="hover:underline flex items-center gap-2">
+						<div class="w-4 h-4 bg-gray-200 rounded-sm"></div>
+						Wikibooks
+					</a>
+					<a href="#" class="hover:underline flex items-center gap-2">
+						<div class="w-4 h-4 bg-gray-200 rounded-sm"></div>
+						Wikisource
+					</a>
+					<a href="#" class="hover:underline flex items-center gap-2">
+						<div class="w-4 h-4 bg-gray-200 rounded-sm"></div>
+						Wikivoyage
+					</a>
+				</div>
+				
+				<p class="text-center italic opacity-70">
+					Portfolio is hosted by Ryan, the non-profit organization that also hosts a range of other projects.
+				</p>
+			</footer>
+		</div>
 	</body>
 </html>
 

@@ -12,6 +12,12 @@ import '../styles/global.css';
 		<title>Battleship PVP | Portfolio</title>
 	</head>
 	<body class="bg-slate-950 text-slate-100">
+		<nav class="absolute top-4 left-4 z-50">
+			<a href="/" class="text-xs bg-slate-900/50 hover:bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-400 hover:text-white transition-colors flex items-center gap-2">
+				<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+				Back to Wiki
+			</a>
+		</nav>
 		<main>
 			<BattleshipGame client:only="react" />
 		</main>
