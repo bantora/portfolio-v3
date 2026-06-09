@@ -1,7 +1,7 @@
 {
 	"compatibility_date": "2026-06-09",
 	"compatibility_flags": ["global_fetch_strictly_public"],
-	"name": "portfolio-projects",
+	"name": "portfolio-v3",
 	"main": "@astrojs/cloudflare/entrypoints/server",
 	"assets": {
 		"directory": "./dist",
