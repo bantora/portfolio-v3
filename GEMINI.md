@@ -1,4 +1,4 @@
-# Project Instructions: portfolio-projects
+# Project Instructions: portfolio-v3
 
 This file contains team-shared architecture, conventions, and workflows for this repository.
 
