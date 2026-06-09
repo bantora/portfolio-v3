@@ -26,6 +26,7 @@ export default function BattleshipGame() {
   const [isHost, setIsHost] = useState(false);
   const [isOpponentReady, setIsOpponentReady] = useState(false);
   const [winner, setWinner] = useState<'me' | 'opponent' | null>(null);
+  const [showForceStart, setShowForceStart] = useState(false);
   
   const [selectedShip, setSelectedShip] = useState<ShipType | null>(null);
   const [isHorizontal, setIsHorizontal] = useState(true);
@@ -33,9 +34,14 @@ export default function BattleshipGame() {
   // Initialize Peer
   useEffect(() => {
     const newPeer = new Peer();
-    newPeer.on('open', (id) => setMyId(id));
+    newPeer.on('open', (id) => {
+      console.log('Peer connected with ID:', id);
+      setMyId(id);
+    });
     newPeer.on('connection', (connection) => {
+      console.log('Incoming connection from:', connection.peer);
       if (conn) {
+        console.warn('Closing redundant connection');
         connection.close();
         return;
       }
@@ -52,8 +58,10 @@ export default function BattleshipGame() {
     if (!conn) return;
 
     conn.on('data', (data: any) => {
+      console.log('Incoming Data:', data.type, data);
       switch (data.type) {
         case 'READY':
+          console.log('Opponent signaled READY');
           setIsOpponentReady(true);
           break;
         case 'ATTACK':
@@ -69,27 +77,52 @@ export default function BattleshipGame() {
           setGameState('gameover');
           setWinner('opponent');
           break;
+        case 'FORCE_START':
+          console.log('Received FORCE_START signal');
+          setGameState('playing');
+          setIsMyTurn(isHost);
+          break;
       }
     });
 
     conn.on('close', () => {
+      console.error('Connection closed by peer');
       alert('Opponent disconnected');
       window.location.reload();
     });
-  }, [conn, handleIncomingAttack, recordAttackResult, setIsMyTurn]);
+  }, [conn, handleIncomingAttack, recordAttackResult, setIsMyTurn, isHost]);
 
   // Handle Game Phase Transitions
   useEffect(() => {
     const allShipsPlaced = myShips.length === Object.keys(SHIP_CONFIG).length;
+    console.log('State Sync Check - Ships Placed:', allShipsPlaced, 'Opponent Ready:', isOpponentReady, 'Current State:', gameState);
     
     if (allShipsPlaced && isOpponentReady) {
+      console.log('All conditions met. Starting Game...');
       setGameState('playing');
       setIsMyTurn(isHost);
     } else if (allShipsPlaced && gameState === 'setup') {
+      console.log('Local setup complete. Sending READY signal.');
       setGameState('waiting');
       conn?.send({ type: 'READY' });
+
+      // Start a timer for Force Start if it hangs
+      const timer = setTimeout(() => {
+        if (gameState !== 'playing') {
+          console.warn('Sync taking too long. Enabling Force Start.');
+          setShowForceStart(true);
+        }
+      }, 5000);
+      return () => clearTimeout(timer);
     }
   }, [myShips.length, isOpponentReady, isHost, conn, gameState]);
+
+  const forceStartGame = () => {
+    console.log('Manual Force Start Triggered');
+    setGameState('playing');
+    setIsMyTurn(isHost);
+    conn?.send({ type: 'FORCE_START' });
+  };
 
   // Check Win Condition
   useEffect(() => {
@@ -239,6 +272,14 @@ export default function BattleshipGame() {
             <h2 className="text-xl font-bold mb-2">Fleet Ready</h2>
             <p className="text-slate-500">Waiting for opponent to finish deployment...</p>
           </div>
+          {showForceStart && (
+            <button
+              onClick={forceStartGame}
+              className="mt-4 px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl shadow-lg transition-all animate-none"
+            >
+              FORCE START GAME
+            </button>
+          )}
         </div>
       )}
 
