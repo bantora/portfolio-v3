@@ -27,31 +27,25 @@ export default function BattleshipGame() {
   const [isOpponentReady, setIsOpponentReady] = useState(false);
   const [winner, setWinner] = useState<'me' | 'opponent' | null>(null);
   const [showForceStart, setShowForceStart] = useState(false);
+  const [rematchStatus, setRematchStatus] = useState<'none' | 'sent' | 'received'>('none');
   
   const [selectedShip, setSelectedShip] = useState<ShipType | null>(null);
   const [isHorizontal, setIsHorizontal] = useState(true);
 
+  const {
+    myGrid,
+    myShips,
+    opponentGrid,
+    isMyTurn,
+    setIsMyTurn,
+    placeShip,
+    handleIncomingAttack,
+    recordAttackResult,
+    reset
+  } = useBattleship();
+
   // Initialize Peer
-  useEffect(() => {
-    const newPeer = new Peer();
-    newPeer.on('open', (id) => {
-      console.log('Peer connected with ID:', id);
-      setMyId(id);
-    });
-    newPeer.on('connection', (connection) => {
-      console.log('Incoming connection from:', connection.peer);
-      if (conn) {
-        console.warn('Closing redundant connection');
-        connection.close();
-        return;
-      }
-      setConn(connection);
-      setIsHost(false);
-      setGameState('setup');
-    });
-    setPeer(newPeer);
-    return () => newPeer.destroy();
-  }, []);
+  // ... (unchanged)
 
   // Handle Incoming Data
   useEffect(() => {
@@ -74,13 +68,20 @@ export default function BattleshipGame() {
           setIsMyTurn(false);
           break;
         case 'GAME_OVER':
+          console.log('Received GAME_OVER signal from opponent');
           setGameState('gameover');
-          setWinner('opponent');
+          setWinner('me');
           break;
         case 'FORCE_START':
           console.log('Received FORCE_START signal');
           setGameState('playing');
           setIsMyTurn(isHost);
+          break;
+        case 'REMATCH_REQUEST':
+          setRematchStatus('received');
+          break;
+        case 'REMATCH_ACCEPT':
+          startRematch();
           break;
       }
     });
@@ -92,19 +93,35 @@ export default function BattleshipGame() {
     });
   }, [conn, handleIncomingAttack, recordAttackResult, setIsMyTurn, isHost]);
 
+  const startRematch = () => {
+    reset();
+    setGameState('setup');
+    setIsOpponentReady(false);
+    setWinner(null);
+    setRematchStatus('none');
+    setShowForceStart(false);
+  };
+
+  const handleRematchClick = () => {
+    if (rematchStatus === 'received') {
+      conn?.send({ type: 'REMATCH_ACCEPT' });
+      startRematch();
+    } else {
+      setRematchStatus('sent');
+      conn?.send({ type: 'REMATCH_REQUEST' });
+    }
+  };
+
   // Handle Game Phase Transitions
   useEffect(() => {
     const allShipsPlaced = myShips.length === Object.keys(SHIP_CONFIG).length;
-    console.log('State Sync Check - Ships Placed:', allShipsPlaced, 'Opponent Ready:', isOpponentReady, 'Current State:', gameState);
-    
-    if (allShipsPlaced && isOpponentReady) {
-      console.log('All conditions met. Starting Game...');
-      setGameState('playing');
-      setIsMyTurn(isHost);
-    } else if (allShipsPlaced && gameState === 'setup') {
-      console.log('Local setup complete. Sending READY signal.');
+    if (!allShipsPlaced || !conn) return;
+
+    // 1. If we just finished placement, ALWAYS tell the opponent we are ready
+    if (gameState === 'setup') {
+      console.log('Local setup complete. Informing opponent.');
       setGameState('waiting');
-      conn?.send({ type: 'READY' });
+      conn.send({ type: 'READY' });
 
       // Start a timer for Force Start if it hangs
       const timer = setTimeout(() => {
@@ -114,6 +131,13 @@ export default function BattleshipGame() {
         }
       }, 5000);
       return () => clearTimeout(timer);
+    }
+    
+    // 2. If both are ready, start the game
+    if (isOpponentReady && gameState === 'waiting') {
+      console.log('Both players ready. Starting Game...');
+      setGameState('playing');
+      setIsMyTurn(isHost);
     }
   }, [myShips.length, isOpponentReady, isHost, conn, gameState]);
 
@@ -316,12 +340,28 @@ export default function BattleshipGame() {
           `}>
             {winner === 'me' ? 'Victory' : 'Defeated'}
           </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="flex items-center gap-2 px-8 py-4 bg-white text-slate-950 font-black rounded-xl hover:bg-slate-200 transition-all"
-          >
-            <Play size={20} fill="currentColor" /> RETURN TO LOBBY
-          </button>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <button
+              onClick={handleRematchClick}
+              disabled={rematchStatus === 'sent'}
+              className={`flex items-center gap-2 px-8 py-4 font-black rounded-xl transition-all
+                ${rematchStatus === 'received' ? 'bg-blue-600 text-white hover:bg-blue-500 animate-pulse' : 
+                  rematchStatus === 'sent' ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 
+                  'bg-white text-slate-950 hover:bg-slate-200'}
+              `}
+            >
+              <RotateCcw size={20} /> 
+              {rematchStatus === 'received' ? 'ACCEPT REMATCH' : 
+               rematchStatus === 'sent' ? 'WAITING FOR OPPONENT...' : 
+               'REQUEST REMATCH'}
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="flex items-center gap-2 px-8 py-4 bg-slate-800 text-white font-black rounded-xl hover:bg-slate-700 transition-all"
+            >
+              <Play size={20} fill="currentColor" /> RETURN TO LOBBY
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -68,46 +68,33 @@ export function useBattleship() {
   }, [myGrid, canPlaceShip]);
 
   const handleIncomingAttack = useCallback((x: number, y: number) => {
-    let result: 'hit' | 'miss' | 'sunk' = 'miss';
-    let sunkShipType: ShipType | undefined;
-
     const cell = myGrid[y][x];
-    if (cell === 'ship') {
-      result = 'hit';
-    } else if (cell === 'empty') {
-      result = 'miss';
-    }
+    if (cell !== 'ship') return { result: 'miss' as const };
+
+    const targetShip = myShips.find(ship => 
+      ship.positions.some(pos => pos[0] === x && pos[1] === y)
+    );
+
+    if (!targetShip) return { result: 'miss' as const };
+
+    const newHits = targetShip.hits + 1;
+    const isSunk = newHits === targetShip.length;
+
+    setMyShips(prev => prev.map(ship => 
+      ship.type === targetShip.type ? { ...ship, hits: newHits } : ship
+    ));
 
     setMyGrid(prev => {
-      const newGrid = [...prev.map(row => [...row])];
-      if (cell === 'ship') {
-        newGrid[y][x] = 'hit';
-      } else if (cell === 'empty') {
-        newGrid[y][x] = 'miss';
-      }
+      const newGrid = prev.map(row => [...row]);
+      newGrid[y][x] = 'hit';
       return newGrid;
     });
 
-    if (result === 'hit') {
-
-      setMyShips(prev => {
-        const newShips = prev.map(ship => {
-          if (ship.positions.some(pos => pos[0] === x && pos[1] === y)) {
-            const newHits = ship.hits + 1;
-            if (newHits === ship.length) {
-              result = 'sunk';
-              sunkShipType = ship.type;
-            }
-            return { ...ship, hits: newHits };
-          }
-          return ship;
-        });
-        return newShips;
-      });
-    }
-
-    return { result, sunkShipType };
-  }, []);
+    return { 
+      result: isSunk ? 'sunk' as const : 'hit' as const, 
+      sunkShipType: isSunk ? targetShip.type : undefined 
+    };
+  }, [myGrid, myShips]);
 
   const recordAttackResult = useCallback((x: number, y: number, result: 'hit' | 'miss' | 'sunk') => {
     setOpponentGrid(prev => {
