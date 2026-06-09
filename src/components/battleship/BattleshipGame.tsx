@@ -78,16 +78,18 @@ export default function BattleshipGame() {
     });
   }, [conn, handleIncomingAttack, recordAttackResult, setIsMyTurn]);
 
-  // Game Phase Transitions
+  // Handle Game Phase Transitions
   useEffect(() => {
-    if (myShips.length === Object.keys(SHIP_CONFIG).length && isOpponentReady) {
+    const allShipsPlaced = myShips.length === Object.keys(SHIP_CONFIG).length;
+    
+    if (allShipsPlaced && isOpponentReady) {
       setGameState('playing');
       setIsMyTurn(isHost);
-    } else if (myShips.length === Object.keys(SHIP_CONFIG).length) {
+    } else if (allShipsPlaced && gameState === 'setup') {
       setGameState('waiting');
       conn?.send({ type: 'READY' });
     }
-  }, [myShips.length, isOpponentReady, isHost, conn]);
+  }, [myShips.length, isOpponentReady, isHost, conn, gameState]);
 
   // Check Win Condition
   useEffect(() => {
