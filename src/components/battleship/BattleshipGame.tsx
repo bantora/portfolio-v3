@@ -177,6 +177,14 @@ export default function BattleshipGame() {
     return () => clearTimeout(timeout);
   }, [gameState, isOpponentReady]);
 
+  // Auto-start for host when both are ready
+  useEffect(() => {
+    if (isHost && gameState === 'waiting' && isOpponentReady && isLocalReady) {
+      console.log('Both ready, auto-starting match...');
+      startMatch();
+    }
+  }, [isHost, gameState, isOpponentReady, isLocalReady]);
+
   const handleGridClick = (x: number, y: number) => {
     if (gameState === 'setup') {
       const shipAtPos = myShips.find(s => s.positions.some(p => p[0] === x && p[1] === y));
