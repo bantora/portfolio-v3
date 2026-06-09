@@ -7,17 +7,6 @@ import { Target, Anchor, Shield, RotateCcw, Play, UserPlus, Zap } from 'lucide-r
 type GameState = 'lobby' | 'setup' | 'waiting' | 'playing' | 'gameover';
 
 export default function BattleshipGame() {
-  const {
-    myGrid,
-    myShips,
-    opponentGrid,
-    isMyTurn,
-    setIsMyTurn,
-    placeShip,
-    handleIncomingAttack,
-    recordAttackResult
-  } = useBattleship();
-
   const [gameState, setGameState] = useState<GameState>('lobby');
   const [peer, setPeer] = useState<Peer | null>(null);
   const [conn, setConn] = useState<DataConnection | null>(null);
@@ -45,7 +34,26 @@ export default function BattleshipGame() {
   } = useBattleship();
 
   // Initialize Peer
-  // ... (unchanged)
+  useEffect(() => {
+    const newPeer = new Peer();
+    newPeer.on('open', (id) => {
+      console.log('Peer connected with ID:', id);
+      setMyId(id);
+    });
+    newPeer.on('connection', (connection) => {
+      console.log('Incoming connection from:', connection.peer);
+      if (conn) {
+        console.warn('Closing redundant connection');
+        connection.close();
+        return;
+      }
+      setConn(connection);
+      setIsHost(false);
+      setGameState('setup');
+    });
+    setPeer(newPeer);
+    return () => newPeer.destroy();
+  }, []);
 
   // Handle Incoming Data
   useEffect(() => {
