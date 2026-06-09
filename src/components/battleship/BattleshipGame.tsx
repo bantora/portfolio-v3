@@ -182,21 +182,69 @@ export default function BattleshipGame() {
     setIsMyTurn(false);
   };
 
-  const renderGrid = (grid: any[][], onClick?: (x: number, y: number) => void) => (
+  const renderGrid = (
+    grid: any[][], 
+    onClick?: (x: number, y: number) => void,
+    onDrop?: (x: number, y: number) => void,
+    isOpponentView: boolean = false
+  ) => (
     <div className="grid grid-cols-10 gap-1 bg-slate-800 p-2 rounded-lg border-2 border-slate-700 shadow-xl">
       {grid.map((row, y) =>
-        row.map((cell, x) => (
-          <button
-            key={`${x}-${y}`}
-            onClick={() => onClick?.(x, y)}
-            className={`w-8 h-8 md:w-10 md:h-10 rounded-sm transition-all duration-200 border border-slate-700/50 
-              ${cell === 'ship' ? 'bg-slate-400' : ''}
-              ${cell === 'hit' ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)] scale-90' : ''}
-              ${cell === 'miss' ? 'bg-blue-300 scale-75 opacity-50' : ''}
-              ${cell === 'empty' ? 'hover:bg-slate-600 bg-slate-900' : ''}
-            `}
-          />
-        ))
+        row.map((cell, x) => {
+          let shipPart = null;
+          if (!isOpponentView && cell === 'ship') {
+            const ship = myShips.find(s => s.positions.some(p => p[0] === x && p[1] === y));
+            if (ship) {
+              const index = ship.positions.findIndex(p => p[0] === x && p[1] === y);
+              const isHorizontal = ship.positions[0][1] === ship.positions[1]?.[1];
+              if (index === 0) shipPart = isHorizontal ? 'left' : 'top';
+              else if (index === ship.length - 1) shipPart = isHorizontal ? 'right' : 'bottom';
+              else shipPart = isHorizontal ? 'h-mid' : 'v-mid';
+            }
+          }
+
+          return (
+            <button
+              key={`${x}-${y}`}
+              onClick={() => onClick?.(x, y)}
+              onDragOver={(e) => {
+                if (onDrop) e.preventDefault();
+              }}
+              onDrop={(e) => {
+                if (onDrop) {
+                  e.preventDefault();
+                  onDrop(x, y);
+                }
+              }}
+              className={`w-8 h-8 md:w-10 md:h-10 rounded-sm transition-all duration-200 border border-slate-700/50 relative overflow-hidden
+                ${cell === 'hit' ? 'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.6)] animate-flicker scale-90' : ''}
+                ${cell === 'miss' ? 'bg-blue-400/30 scale-75' : ''}
+                ${cell === 'empty' ? 'hover:bg-slate-600 bg-slate-900' : ''}
+                ${cell === 'ship' && !shipPart ? 'bg-slate-400' : ''}
+              `}
+            >
+              {cell === 'hit' && (
+                <div className="absolute inset-0 bg-orange-500 animate-explode pointer-events-none" />
+              )}
+              {cell === 'miss' && (
+                <div className="absolute inset-0 bg-white animate-splash pointer-events-none" />
+              )}
+              
+              {shipPart && (
+                <div className={`absolute inset-0 bg-slate-400 border-slate-500
+                  ${shipPart === 'left' ? 'rounded-l-full border-l-4' : ''}
+                  ${shipPart === 'right' ? 'rounded-r-full border-r-4' : ''}
+                  ${shipPart === 'top' ? 'rounded-t-full border-t-4' : ''}
+                  ${shipPart === 'bottom' ? 'rounded-b-full border-b-4' : ''}
+                  ${shipPart === 'h-mid' ? 'border-y-2' : ''}
+                  ${shipPart === 'v-mid' ? 'border-x-2' : ''}
+                `}>
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/2 h-1/2 bg-slate-500/30 rounded-sm" />
+                </div>
+              )}
+            </button>
+          );
+        })
       )}
     </div>
   );
@@ -255,7 +303,7 @@ export default function BattleshipGame() {
             <h2 className="text-2xl font-bold flex items-center gap-2">
               <Anchor className="text-blue-400" /> DEPLOY YOUR FLEET
             </h2>
-            <p className="text-slate-400">Place your ships on the grid. Select a ship and click to deploy.</p>
+            <p className="text-slate-400">Place your ships on the grid. Drag a ship or click to deploy.</p>
           </div>
 
           <div className="flex flex-col lg:flex-row gap-12 items-center lg:items-start">
@@ -264,11 +312,13 @@ export default function BattleshipGame() {
                 {(Object.keys(SHIP_CONFIG) as ShipType[]).map((type) => (
                   <button
                     key={type}
+                    draggable={!myShips.some(s => s.type === type)}
+                    onDragStart={() => setSelectedShip(type)}
                     disabled={myShips.some(s => s.type === type)}
                     onClick={() => setSelectedShip(type)}
                     className={`p-3 rounded-xl border-2 text-left transition-all relative overflow-hidden group
                       ${selectedShip === type ? 'border-blue-500 bg-blue-500/10' : 'border-slate-800 bg-slate-900'}
-                      ${myShips.some(s => s.type === type) ? 'opacity-30 cursor-not-allowed grayscale' : 'hover:border-slate-600'}
+                      ${myShips.some(s => s.type === type) ? 'opacity-30 cursor-not-allowed grayscale' : 'hover:border-slate-600 cursor-grab active:cursor-grabbing'}
                     `}
                   >
                     <div className="relative z-10">
@@ -290,7 +340,11 @@ export default function BattleshipGame() {
                 ROTATION: {isHorizontal ? 'HORIZONTAL' : 'VERTICAL'}
               </button>
             </div>
-            {renderGrid(myGrid, (x, y) => selectedShip && placeShip(selectedShip, x, y, isHorizontal))}
+            {renderGrid(
+              myGrid, 
+              (x, y) => selectedShip && placeShip(selectedShip, x, y, isHorizontal),
+              (x, y) => selectedShip && placeShip(selectedShip, x, y, isHorizontal)
+            )}
           </div>
         </div>
       )}
