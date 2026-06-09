@@ -47,8 +47,14 @@ export function useBattleship() {
 
   const placeShip = useCallback((type: ShipType, x: number, y: number, horizontal: boolean) => {
     setMyShips(prev => {
-      if (prev.some(s => s.type === type)) return prev; // Already placed
-      if (!canPlaceShip(type, x, y, horizontal, prev)) return prev;
+      if (prev.some(s => s.type === type)) {
+        console.warn('Hook: Ship already placed:', type);
+        return prev;
+      }
+      if (!canPlaceShip(type, x, y, horizontal, prev)) {
+        console.warn('Hook: Cannot place ship here:', type, x, y);
+        return prev;
+      }
 
       const length = SHIP_CONFIG[type];
       const positions: [number, number][] = [];
@@ -57,15 +63,18 @@ export function useBattleship() {
       }
 
       const newShip: Ship = { type, length, positions, hits: 0 };
-      const newGrid = [...myGrid.map(row => [...row])];
-      positions.forEach(([px, py]) => {
-        newGrid[py][px] = 'ship';
+      
+      setMyGrid(gridPrev => {
+        const newGrid = gridPrev.map(row => [...row]);
+        positions.forEach(([px, py]) => {
+          newGrid[py][px] = 'ship';
+        });
+        return newGrid;
       });
-      setMyGrid(newGrid);
 
       return [...prev, newShip];
     });
-  }, [myGrid, canPlaceShip]);
+  }, [canPlaceShip]);
 
   const handleIncomingAttack = useCallback((x: number, y: number) => {
     const cell = myGrid[y][x];
@@ -106,6 +115,32 @@ export function useBattleship() {
     });
   }, []);
 
+  const removeShip = useCallback((type: ShipType) => {
+    console.log('Hook: Removing ship:', type);
+    const shipToRemove = myShips.find(s => s.type === type);
+    if (!shipToRemove) {
+      console.warn('Hook: Ship not found for removal:', type);
+      return;
+    }
+
+    setMyGrid(prev => {
+      const newGrid = prev.map(row => [...row]);
+      shipToRemove.positions.forEach(([px, py]) => {
+        newGrid[py][px] = 'empty';
+      });
+      return newGrid;
+    });
+
+    setMyShips(prev => prev.filter(s => s.type !== type));
+  }, [myShips]);
+
+  const reset = useCallback(() => {
+    setMyGrid(createEmptyGrid());
+    setMyShips([]);
+    setOpponentGrid(createEmptyGrid());
+    setIsMyTurn(false);
+  }, []);
+
   return {
     myGrid,
     myShips,
@@ -113,13 +148,9 @@ export function useBattleship() {
     isMyTurn,
     setIsMyTurn,
     placeShip,
+    removeShip,
     handleIncomingAttack,
     recordAttackResult,
-    reset: () => {
-      setMyGrid(createEmptyGrid());
-      setMyShips([]);
-      setOpponentGrid(createEmptyGrid());
-      setIsMyTurn(false);
-    }
+    reset
   };
 }

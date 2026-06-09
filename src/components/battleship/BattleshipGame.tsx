@@ -14,6 +14,7 @@ export default function BattleshipGame() {
   const [remoteId, setRemoteId] = useState('');
   const [isHost, setIsHost] = useState(false);
   const [isOpponentReady, setIsOpponentReady] = useState(false);
+  const [isLocalReady, setIsLocalReady] = useState(false);
   const [winner, setWinner] = useState<'me' | 'opponent' | null>(null);
   const [showForceStart, setShowForceStart] = useState(false);
   const [rematchStatus, setRematchStatus] = useState<'none' | 'sent' | 'received'>('none');
@@ -28,6 +29,7 @@ export default function BattleshipGame() {
     isMyTurn,
     setIsMyTurn,
     placeShip,
+    removeShip,
     handleIncomingAttack,
     recordAttackResult,
     reset
@@ -78,6 +80,11 @@ export default function BattleshipGame() {
           console.log('Opponent signaled READY');
           setIsOpponentReady(true);
           break;
+        case 'START_GAME':
+          console.log('Match started by host');
+          setGameState('playing');
+          setIsMyTurn(isHost);
+          break;
         case 'ATTACK':
           const attackResult = handleIncomingAttack(data.x, data.y);
           conn.send({ type: 'RESULT', x: data.x, y: data.y, ...attackResult });
@@ -117,6 +124,7 @@ export default function BattleshipGame() {
     reset();
     setGameState('setup');
     setIsOpponentReady(false);
+    setIsLocalReady(false);
     setWinner(null);
     setRematchStatus('none');
     setShowForceStart(false);
@@ -132,40 +140,64 @@ export default function BattleshipGame() {
     }
   };
 
-  // Handle Game Phase Transitions
-  useEffect(() => {
-    const allShipsPlaced = myShips.length === Object.keys(SHIP_CONFIG).length;
-    if (!allShipsPlaced || !conn) return;
-
-    // 1. If we just finished placement, ALWAYS tell the opponent we are ready
-    if (gameState === 'setup') {
-      console.log('Local setup complete. Informing opponent.');
-      setGameState('waiting');
-      conn.send({ type: 'READY' });
-
-      // Start a timer for Force Start if it hangs
-      const timer = setTimeout(() => {
-        if (gameState !== 'playing') {
-          console.warn('Sync taking too long. Enabling Force Start.');
-          setShowForceStart(true);
-        }
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-    
-    // 2. If both are ready, start the game
-    if (isOpponentReady && gameState === 'waiting') {
-      console.log('Both players ready. Starting Game...');
+  const startMatch = () => {
+    if (isHost && isLocalReady && isOpponentReady) {
       setGameState('playing');
-      setIsMyTurn(isHost);
+      setIsMyTurn(true);
+      conn?.send({ type: 'START_GAME' });
     }
-  }, [myShips.length, isOpponentReady, isHost, conn, gameState]);
+  };
+
+  const toggleReady = () => {
+    const nextReady = !isLocalReady;
+    setIsLocalReady(nextReady);
+    if (nextReady) {
+      conn?.send({ type: 'READY' });
+      setGameState('waiting');
+    }
+  };
 
   const forceStartGame = () => {
-    console.log('Manual Force Start Triggered');
+    console.log('Force starting match');
     setGameState('playing');
     setIsMyTurn(isHost);
     conn?.send({ type: 'FORCE_START' });
+  };
+
+  // Handle Force Start Timeout
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (gameState === 'waiting' && !isOpponentReady) {
+      timeout = setTimeout(() => {
+        setShowForceStart(true);
+      }, 5000); // Show force start after 5 seconds of waiting
+    } else {
+      setShowForceStart(false);
+    }
+    return () => clearTimeout(timeout);
+  }, [gameState, isOpponentReady]);
+
+  const handleGridClick = (x: number, y: number) => {
+    if (gameState === 'setup') {
+      const shipAtPos = myShips.find(s => s.positions.some(p => p[0] === x && p[1] === y));
+      console.log('Grid Click at:', x, y, 'Ship at pos:', shipAtPos?.type, 'Selected:', selectedShip);
+      
+      if (shipAtPos) {
+        console.log('Picking up ship:', shipAtPos.type);
+        removeShip(shipAtPos.type);
+        setSelectedShip(shipAtPos.type);
+      } else if (selectedShip) {
+        console.log('Attempting to place:', selectedShip);
+        placeShip(selectedShip, x, y, isHorizontal);
+      }
+    }
+  };
+
+  const handleGridDrop = (x: number, y: number) => {
+    if (gameState === 'setup' && selectedShip) {
+      console.log('Drop at:', x, y, 'Ship:', selectedShip);
+      placeShip(selectedShip, x, y, isHorizontal);
+    }
   };
 
   // Check Win Condition
@@ -219,6 +251,17 @@ export default function BattleshipGame() {
             <button
               key={`${x}-${y}`}
               onClick={() => onClick?.(x, y)}
+              draggable={!isOpponentView && cell === 'ship' && gameState === 'setup'}
+              onDragStart={() => {
+                if (!isOpponentView && cell === 'ship' && gameState === 'setup') {
+                  const ship = myShips.find(s => s.positions.some(p => p[0] === x && p[1] === y));
+                  if (ship) {
+                    console.log('Dragging ship from grid:', ship.type);
+                    setSelectedShip(ship.type);
+                    removeShip(ship.type);
+                  }
+                }
+              }}
               onDragOver={(e) => {
                 if (onDrop) e.preventDefault();
               }}
@@ -233,6 +276,7 @@ export default function BattleshipGame() {
                 ${cell === 'miss' ? 'bg-blue-400/30 scale-75' : ''}
                 ${cell === 'empty' ? 'hover:bg-slate-600 bg-slate-900' : ''}
                 ${cell === 'ship' && !shipPart ? 'bg-slate-400' : ''}
+                ${!isOpponentView && cell === 'ship' && gameState === 'setup' ? 'cursor-grab active:cursor-grabbing' : ''}
               `}
             >
               {cell === 'hit' && (
@@ -243,7 +287,7 @@ export default function BattleshipGame() {
               )}
               
               {shipPart && (
-                <div className={`absolute inset-0 bg-slate-400 border-slate-500
+                <div className={`absolute inset-0 bg-slate-400 border-slate-500 pointer-events-none
                   ${shipPart === 'left' ? 'rounded-l-full border-l-4' : ''}
                   ${shipPart === 'right' ? 'rounded-r-full border-r-4' : ''}
                   ${shipPart === 'top' ? 'rounded-t-full border-t-4' : ''}
@@ -320,7 +364,7 @@ export default function BattleshipGame() {
 
           <div className="flex flex-col lg:flex-row gap-12 items-center lg:items-start">
             <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className={`grid gap-3 ${isHorizontal ? 'grid-cols-2' : 'grid-cols-1'}`}>
                 {(Object.keys(SHIP_CONFIG) as ShipType[]).map((type) => (
                   <button
                     key={type}
@@ -333,13 +377,20 @@ export default function BattleshipGame() {
                       ${myShips.some(s => s.type === type) ? 'opacity-30 cursor-not-allowed grayscale' : 'hover:border-slate-600 cursor-grab active:cursor-grabbing'}
                     `}
                   >
-                    <div className="relative z-10">
-                      <div className="text-xs font-black uppercase tracking-tighter mb-1 text-slate-500 group-hover:text-slate-400">{type}</div>
-                      <div className="flex gap-1">
-                        {Array(SHIP_CONFIG[type]).fill(0).map((_, i) => (
-                          <div key={i} className={`w-2 h-4 rounded-sm ${selectedShip === type ? 'bg-blue-500' : 'bg-slate-700'}`} />
-                        ))}
+                    <div className={`relative z-10 flex ${isHorizontal ? 'flex-col' : 'flex-row items-center justify-between gap-4'}`}>
+                      <div>
+                        <div className="text-xs font-black uppercase tracking-tighter mb-1 text-slate-500 group-hover:text-slate-400">{type}</div>
+                        <div className={`flex gap-1 ${isHorizontal ? 'flex-row' : 'flex-col'}`}>
+                          {Array(SHIP_CONFIG[type]).fill(0).map((_, i) => (
+                            <div key={i} className={`${isHorizontal ? 'w-2 h-4' : 'w-4 h-2'} rounded-sm ${selectedShip === type ? 'bg-blue-500' : 'bg-slate-700'}`} />
+                          ))}
+                        </div>
                       </div>
+                      {!isHorizontal && (
+                        <div className="text-xs font-bold text-slate-500 group-hover:text-slate-400">
+                          {SHIP_CONFIG[type]} UNITS
+                        </div>
+                      )}
                     </div>
                   </button>
                 ))}
@@ -354,8 +405,38 @@ export default function BattleshipGame() {
             </div>
             {renderGrid(
               myGrid, 
-              (x, y) => selectedShip && placeShip(selectedShip, x, y, isHorizontal),
-              (x, y) => selectedShip && placeShip(selectedShip, x, y, isHorizontal)
+              (x, y) => handleGridClick(x, y),
+              (x, y) => handleGridDrop(x, y)
+            )}
+          </div>
+
+          <div className="flex flex-col items-center gap-4 mt-8">
+            {myShips.length === Object.keys(SHIP_CONFIG).length && !isLocalReady && (
+              <button
+                onClick={toggleReady}
+                className="px-12 py-4 bg-green-600 hover:bg-green-500 text-white font-black rounded-xl shadow-xl shadow-green-900/20 transition-all active:scale-95 animate-bounce"
+              >
+                I'M READY!
+              </button>
+            )}
+
+            {isLocalReady && (
+              <div className="flex flex-col items-center gap-4">
+                <div className="px-6 py-2 bg-slate-800 text-green-400 font-bold rounded-full border border-green-500/30 flex items-center gap-2">
+                  <Shield size={16} /> WAITING FOR OPPONENT...
+                </div>
+                {isHost && isOpponentReady && (
+                  <button
+                    onClick={startMatch}
+                    className="px-12 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl shadow-xl shadow-blue-900/20 transition-all active:scale-95"
+                  >
+                    START MATCH
+                  </button>
+                )}
+                {!isHost && isOpponentReady && (
+                  <p className="text-slate-400 italic">Waiting for host to start...</p>
+                )}
+              </div>
             )}
           </div>
         </div>
