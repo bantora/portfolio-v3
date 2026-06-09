@@ -33,11 +33,23 @@ export default function BattleshipGame() {
     reset
   } = useBattleship();
 
+  // Generate a random 6-character alphanumeric ID
+  const generateRoomCode = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Excluded similar looking chars like I, 1, O, 0
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
   // Initialize Peer
   useEffect(() => {
-    const newPeer = new Peer();
+    const roomCode = generateRoomCode();
+    const newPeer = new Peer(roomCode);
+    
     newPeer.on('open', (id) => {
-      console.log('Peer connected with ID:', id);
+      console.log('Peer connected with Room Code:', id);
       setMyId(id);
     });
     newPeer.on('connection', (connection) => {
